@@ -1,19 +1,13 @@
-# visual-editor
+## visual-editor
 
-## Project setup
-```
-yarn install
-```
+* draggable zone
+* droppable zone
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+### Tutorial
 
-### Compiles and minifies for production
-```
-yarn build
-```
+* [Drag operation](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations)
+* [specify drop target](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#specifying_drop_targets)
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Reference Resource
+
+* [vue-drag-resize](https://github.com/kirillmurashov/vue-drag-resize)

@@ -1,9 +1,21 @@
-export const dataSource = {
+import { Ref, UnwrapRef } from '@vue/reactivity';
+import { PlainObject } from '@/utils/types';
+
+export type RefData = Ref<UnwrapRef<DataSource>>
+
+export interface DataSource {
+  container: PlainObject,
+  blocks: PlainObject[]
+}
+
+export const dataSource: DataSource = {
   container: {
-    width: 550,
-    height: 550
+    width: 800,
+    height: 800
   },
   blocks: [
-    { left: 0, top: 0, key: 'text' }
+    { left: 100, top: 100, key: 'text' },
+    { left: 200, top: 200, key: 'button' },
+    { left: 300, top: 300, key: 'input' },
   ]
 };
