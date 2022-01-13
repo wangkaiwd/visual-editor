@@ -12,18 +12,23 @@ export default defineComponent({
   name: 'Layout',
   setup () {
     const { data, changeData } = inject<AppContextProps>(AppContextKey)!;
-    let draggingElement: RegisterParams | undefined = undefined;
+    let draggingComponent: RegisterParams | undefined = undefined;
     const onDragstart = (e: DragEvent, component: RegisterParams) => {
       console.log('e-item-dragstart', e);
-      draggingElement = component;
+      draggingComponent = component;
     };
     const onDragend: DragHandler = (e) => {
       console.log('e-item-dragend', e);
-      draggingElement = undefined;
+      draggingComponent = undefined;
     };
 
     const onDragenter: DragHandler = (e) => {
       console.log('drag enter');
+      // fixme: drop effect do nothing ?
+      // if (e.dataTransfer) {
+      //   e.dataTransfer.dropEffect = 'move';
+      //   console.log('data', e.dataTransfer);
+      // }
       // cursor style will change
       e.preventDefault();
     };
@@ -34,11 +39,12 @@ export default defineComponent({
     const onDrop: DragHandler = (e) => {
       console.log('drop', e);
       const dataCopy = deepClone(data.value);
-      if (draggingElement) {
+      if (draggingComponent) {
         dataCopy.blocks.push({
-          left: 0,
-          top: 0,
-          key: draggingElement.key
+          left: e.offsetX,
+          top: e.offsetY,
+          key: draggingComponent.key,
+          alignCenter: true
         });
         changeData(dataCopy);
       }

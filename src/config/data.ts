@@ -10,8 +10,8 @@ export interface DataSource {
 
 export const dataSource: DataSource = {
   container: {
-    width: 800,
-    height: 800
+    // width: 800,
+    // height: 800
   },
   blocks: [
     { left: 100, top: 100, key: 'text' },
