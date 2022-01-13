@@ -31,7 +31,7 @@ export default defineComponent({
       };
     });
     const blocks = computed(() => data.value.blocks);
-    const renderBlocks = () => blocks.value.map(block => <EditorBlock block={block}/>);
+    const renderBlocks = () => blocks.value.map((block, i) => <EditorBlock key={i} index={i} block={block}/>);
     return () => (
       <div class="container-panel">
         <div

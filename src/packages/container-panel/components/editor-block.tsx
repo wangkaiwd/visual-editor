@@ -1,6 +1,7 @@
-import { computed, defineComponent, inject, ref, toRefs } from 'vue';
+import { computed, defineComponent, inject, onMounted, ref } from 'vue';
 import './index.less';
 import { AppContextKey, AppContextProps } from '@/App';
+import { deepClone } from '@/utils/helper';
 
 export default defineComponent({
   name: 'EditorBlock',
@@ -8,24 +9,32 @@ export default defineComponent({
     block: {
       type: Object,
       required: true
+    },
+    index: {
+      type: Number,
+      required: true
     }
   },
   setup (props) {
+    // must be careful use child property directly
     const { block } = props;
+    const { changeData, data } = inject<AppContextProps>(AppContextKey)!;
     const blockRef = ref<HTMLDivElement | null>(null);
-    const blockStyle = computed(() => {
-      let { left, top } = block;
-      if (block.alignCenter) {
-        if (blockRef.value) {
-          const { width, height } = blockRef.value.getBoundingClientRect();
-          left = left - width / 2;
-          top = top - height / 2;
-        }
-      }
+    const blockStyle = computed(() => { // block
       return {
-        left: left + 'px',
-        top: top + 'px'
+        left: props.block.left + 'px',
+        top: props.block.top + 'px'
       };
+    });
+    const dataCopy = deepClone(data.value);
+    onMounted(() => {
+      if (blockRef.value && block.alignCenter) {
+        const { width, height } = blockRef.value.getBoundingClientRect();
+        const item = dataCopy.blocks[props.index];
+        item.left -= width / 2;
+        item.top -= height / 2;
+        changeData(dataCopy);
+      }
     });
     const { config } = inject<AppContextProps>(AppContextKey)!;
     return () => {
