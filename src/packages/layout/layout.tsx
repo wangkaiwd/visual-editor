@@ -44,7 +44,8 @@ export default defineComponent({
           left: e.offsetX,
           top: e.offsetY,
           key: draggingComponent.key,
-          alignCenter: true
+          alignCenter: true,
+          id: Date.now()
         });
         changeData(dataCopy);
       }

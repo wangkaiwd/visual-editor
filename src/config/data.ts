@@ -14,8 +14,8 @@ export const dataSource: DataSource = {
     // height: 800
   },
   blocks: [
-    { left: 100, top: 100, key: 'text' },
-    { left: 200, top: 200, key: 'button' },
-    { left: 300, top: 300, key: 'input' },
+    { id: 1, left: 100, top: 100, key: 'text' },
+    { id: 2, left: 200, top: 200, key: 'button' },
+    { id: 3, left: 300, top: 300, key: 'input' },
   ]
 };

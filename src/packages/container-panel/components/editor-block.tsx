@@ -1,13 +1,19 @@
-import { computed, defineComponent, inject, onMounted, ref } from 'vue';
+import { computed, defineComponent, inject, onMounted, PropType, ref } from 'vue';
 import './index.less';
 import { AppContextKey, AppContextProps } from '@/App';
 import { deepClone } from '@/utils/helper';
+import { classNames } from '@/utils/classNames';
+import { MouseEventHandler } from '@/utils/types';
 
 export default defineComponent({
   name: 'EditorBlock',
   props: {
     block: {
       type: Object,
+      required: true
+    },
+    onMousedown: {
+      type: Function as PropType<MouseEventHandler>,
       required: true
     },
     index: {
@@ -36,12 +42,20 @@ export default defineComponent({
         changeData(dataCopy);
       }
     });
+    const onMousedown = (e: MouseEvent) => {
+      props.onMousedown(e);
+    };
     const { config } = inject<AppContextProps>(AppContextKey)!;
     return () => {
       const { componentMap } = config;
       const renderComponent = componentMap[block.key].render();
       return (
-        <div class="editor-block" style={blockStyle.value} ref={blockRef}>
+        <div
+          class={classNames(['editor-block', { focus: props.block.focus }])}
+          style={blockStyle.value}
+          ref={blockRef}
+          onMousedown={onMousedown}
+        >
           {renderComponent}
         </div>
       );

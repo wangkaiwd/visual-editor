@@ -1,9 +1,19 @@
-import { computed, defineComponent, inject, PropType, reactive, toRefs } from 'vue';
+import { computed, defineComponent, inject, onBeforeUnmount, onMounted, PropType, ref } from 'vue';
 import { AppContextKey, AppContextProps } from '@/App';
 import './index.less';
 import EditorBlock from '@/packages/container-panel/components/editor-block';
+import { deepClone } from '@/utils/helper';
+import { DataSource } from '@/config/data';
+import { PlainObject } from '@/utils/types';
+import { useClickOutside } from '@/hooks/clickOutside';
 
 export type DragHandler = (e: DragEvent) => void
+
+interface MoveContext {
+  movingBlock?: PlainObject;
+  movingIndex: number;
+}
+
 export default defineComponent({
   name: 'ContainerPanel',
   props: {
@@ -21,7 +31,7 @@ export default defineComponent({
     }
   },
   setup (props) {
-    const { data } = inject<AppContextProps>(AppContextKey)!;
+    const { data, changeData } = inject<AppContextProps>(AppContextKey)!;
     const containerContentStyles = computed(() => {
       const { width, height } = data.value.container;
       return {
@@ -30,8 +40,83 @@ export default defineComponent({
         border: `1px solid black`
       };
     });
+    const containerRef = ref<HTMLDivElement | null>(null);
     const blocks = computed(() => data.value.blocks);
-    const renderBlocks = () => blocks.value.map((block, i) => <EditorBlock key={i} index={i} block={block}/>);
+    // const blocksMap = computed(() => blocks.value.reduce((memo, block) => {
+    //     memo[block.id] = block;
+    //     return memo;
+    //   }, {})
+    // );
+
+    function createMoveContext (): MoveContext {
+      return {
+        movingBlock: undefined,
+        movingIndex: -1,
+      };
+    }
+
+    const moveContext = createMoveContext();
+    const focusBlocks = computed(() => data.value.blocks.filter(block => block.focus));
+    const unFocusBlocks = computed(() => data.value.blocks.filter(block => !block.focus));
+    const blockRefs = ref<HTMLDivElement[]>([]);
+    const clearFocus = () => {
+      const dataCopy: DataSource = deepClone(data.value);
+      dataCopy.blocks.forEach(block => { block.focus = false; });
+      changeData(dataCopy);
+    };
+    useClickOutside(document, blockRefs, clearFocus);
+
+    const onMousedown = (e: MouseEvent, i: number, block: PlainObject) => {
+      console.log('mosuedown', e);
+      moveContext.movingBlock = block;
+      moveContext.movingIndex = i;
+      document.addEventListener('mousemove', onMousemove);
+      document.addEventListener('mouseup', onMouseup);
+      if (!block.focus) {
+        if (!e.shiftKey) { // not support all key
+          clearFocus();
+        }
+        const dataCopy = deepClone(data.value);
+        dataCopy.blocks[i].focus = true;
+        changeData(dataCopy);
+      }
+    };
+    const onMousemove = (e: MouseEvent) => {
+      const { movingBlock } = moveContext;
+      if (!movingBlock) {return;}
+      if (!focusBlocks.value.length) {return;}
+      const dataCopy = deepClone(data.value);
+      const blocksMap = dataCopy.blocks.reduce((memo: PlainObject, block: PlainObject) => {
+        memo[block.id] = block;
+        return memo;
+      }, {});
+      focusBlocks.value.forEach((block) => {
+        const blockCopy = blocksMap[block.id];
+        blockCopy.left += e.movementX;
+        blockCopy.top += e.movementY;
+      });
+      changeData(dataCopy);
+    };
+    onBeforeUnmount(() => {
+      document.removeEventListener('mousemove', onMousemove);
+      document.removeEventListener('mouseup', onMouseup);
+    });
+    const onMouseup = (e: MouseEvent) => {
+      console.log('mosueup', e);
+      moveContext.movingIndex = -1;
+      moveContext.movingBlock = undefined;
+      document.removeEventListener('mousemove', onMousemove);
+      document.removeEventListener('mouseup', onMouseup);
+    };
+    const renderBlocks = () => blocks.value.map((block, i) => (
+      <EditorBlock
+        onMousedown={(e: MouseEvent) => onMousedown(e, i, block)}
+        key={block.id}
+        ref={(el: any) => {blockRefs.value[i] = el.$el as HTMLDivElement;}}
+        index={i}
+        block={block}
+      />)
+    );
     return () => (
       <div class="container-panel">
         <div
@@ -39,6 +124,7 @@ export default defineComponent({
           onDragenter={props.onDragenter}
           onDragover={props.onDragover}
           onDrop={props.onDrop}
+          ref={containerRef}
           style={containerContentStyles.value}
         >
           {renderBlocks()}
