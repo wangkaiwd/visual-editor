@@ -8,6 +8,12 @@ import { DragHandler, PlainObject } from '@/utils/types';
 import { useClickOutside } from '@/hooks/clickOutside';
 import { useLines } from '@/packages/container-panel/useLines';
 import { MoveContext } from '@/packages/container-panel/types';
+import { isUndefined } from '@/utils/dataType';
+
+interface FinalPosition {
+  blockY?: number;
+  blockX?: number;
+}
 
 export default defineComponent({
   name: 'ContainerPanel',
@@ -47,7 +53,12 @@ export default defineComponent({
     }
 
     const blockRefs = ref<HTMLDivElement[]>([]);
-    const moveContext = createMoveContext();
+    const finalPosition = reactive<FinalPosition>({ blockY: undefined, blockX: undefined });
+    const moveContext = reactive<MoveContext>(createMoveContext());
+    const currentMovingBlock = computed(() => {
+      const { movingIndex } = moveContext;
+      return blocks.value[movingIndex];
+    });
     const focusBlocks = computed(() => data.value.blocks.filter(block => block.focus));
     const unFocusBlocks = computed(() => data.value.blocks.filter(block => !block.focus));
     const clearFocus = () => {
@@ -73,15 +84,8 @@ export default defineComponent({
       }
       moveContext.lines = calcLines(block);
     };
-    const updateGuideLine = (moveX: number, moveY: number) => {
-      const { movingIndex, lines } = moveContext;
-      const current = blocks.value[movingIndex];
-      const top = current.top + moveX;
-      const left = current.left + moveY;
-      guideLine.y = findY(top, lines.y);
-      guideLine.x = findX(left, lines.x);
-    };
-    const moveBlocks = (moveX: number, moveY: number) => {
+
+    function moveBlocks (moveX: number, moveY: number) {
       const dataCopy = deepClone(data.value);
       const blocksMap = dataCopy.blocks.reduce((memo: PlainObject, block: PlainObject) => {
         memo[block.id] = block;
@@ -89,10 +93,22 @@ export default defineComponent({
       }, {});
       focusBlocks.value.forEach((block) => {
         const blockCopy = blocksMap[block.id];
-        blockCopy.left += moveX;
-        blockCopy.top += moveY;
+        blockCopy.left = blockCopy.left + moveX;
+        blockCopy.top = blockCopy.top + moveY;
       });
       changeData(dataCopy);
+    }
+
+    const updateGuideLineAndFinalPosition = (moveX: number, moveY: number) => {
+      const { lines } = moveContext;
+      const top = currentMovingBlock.value.top + moveX;
+      const left = currentMovingBlock.value.left + moveY;
+      const { y, blockY } = findY(top, lines.y);
+      const { x, blockX } = findX(left, lines.x);
+      guideLine.y = y;
+      guideLine.x = x;
+      finalPosition.blockX = blockX;
+      finalPosition.blockY = blockY;
     };
     const onMousemove = (e: MouseEvent) => {
       const { movingBlock, movingIndex, lines } = moveContext;
@@ -100,16 +116,29 @@ export default defineComponent({
       if (!focusBlocks.value.length) {return;}
       const moveX = e.movementX;
       const moveY = e.movementY;
-      updateGuideLine(moveX, moveY);
+      updateGuideLineAndFinalPosition(moveX, moveY);
       moveBlocks(moveX, moveY);
     };
-
+    const finalMove = () => {
+      const { left, top } = currentMovingBlock.value;
+      let moveX = 0, moveY = 0;
+      if (finalPosition.blockX) {
+        moveX = finalPosition.blockX - left;
+      }
+      if (finalPosition.blockY) {
+        moveY = finalPosition.blockY - top;
+      }
+      moveBlocks(moveX, moveY);
+    };
     const onMouseup = (e: MouseEvent) => {
+      finalMove();
       moveContext.movingIndex = -1;
       moveContext.movingBlock = undefined;
       moveContext.lines = { x: [], y: [] };
       guideLine.x = -1;
       guideLine.y = -1;
+      finalPosition.blockY = undefined;
+      finalPosition.blockX = undefined;
       document.removeEventListener('mousemove', onMousemove);
       document.removeEventListener('mouseup', onMouseup);
     };

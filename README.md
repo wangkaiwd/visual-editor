@@ -27,3 +27,10 @@
 ### Article
 
 * How to complete a drag and drop operation ?
+
+### Feature
+
+* drag and drop
+* move one block or multiple blocks
+* help lines
+* sticky to help lines(when mouseup event fired)

@@ -24,25 +24,29 @@ export const useLines = (unFocusBlocks: Ref<PlainObject[]>) => {
   };
   const findY = (top: number, linesY: IY[]) => {
     let y = -1;
+    let blockY: number | undefined = undefined;
     for (let i = 0; i < linesY.length; i++) {
       const { blockTop, lineTop } = linesY[i];
       if (Math.abs(top - blockTop) < 4) { // find it
         y = lineTop;
+        blockY = blockTop;
         break;
       }
     }
-    return y;
+    return { y, blockY };
   };
   const findX = (top: number, linesX: IX[]) => {
     let x = -1;
+    let blockX: number | undefined = undefined;
     for (let i = 0; i < linesX.length; i++) {
       const { blockLeft, lineLeft } = linesX[i];
       if (Math.abs(top - blockLeft) < 4) { // find it
         x = lineLeft;
+        blockX = blockLeft;
         break;
       }
     }
-    return x;
+    return { x, blockX };
   };
   return {
     calcLines,
