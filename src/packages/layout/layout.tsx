@@ -1,12 +1,13 @@
 import { defineComponent, inject } from 'vue';
 import ComponentsPanel from '@/packages/comonents-panel/components-panel';
-import ContainerPanel, { DragHandler } from '@/packages/container-panel/container-panel';
+import ContainerPanel from '@/packages/container-panel/container-panel';
 import PropsPanel from '@/packages/props-panel/props-panel';
 import './index.less';
 import { ElAside, ElContainer, ElHeader } from 'element-plus';
 import { RegisterParams } from '@/config/editor';
 import { AppContextKey, AppContextProps } from '@/App';
 import { deepClone } from '@/utils/helper';
+import { DragHandler } from '@/utils/types';
 
 export default defineComponent({
   name: 'Layout',

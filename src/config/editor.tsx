@@ -43,8 +43,8 @@ config.register({
 config.register({
   label: '按钮',
   key: 'button',
-  preview: () => <ElButton>预览按钮</ElButton>,
-  render: () => <ElButton>渲染按钮</ElButton>
+  preview: () => <ElButton size={'large'}>预览按钮</ElButton>,
+  render: () => <ElButton size={'large'}>渲染按钮</ElButton>
 });
 
 config.register({

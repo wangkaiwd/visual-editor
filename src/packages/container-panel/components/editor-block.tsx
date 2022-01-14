@@ -32,13 +32,19 @@ export default defineComponent({
         top: props.block.top + 'px'
       };
     });
-    const dataCopy = deepClone(data.value);
+
     onMounted(() => {
-      if (blockRef.value && block.alignCenter) {
+      if (blockRef.value) {
         const { width, height } = blockRef.value.getBoundingClientRect();
+        const dataCopy = deepClone(data.value);
         const item = dataCopy.blocks[props.index];
-        item.left -= width / 2;
-        item.top -= height / 2;
+        if (block.alignCenter) {
+          item.left -= width / 2;
+          item.top -= height / 2;
+        }
+        // set width and height
+        item.width = width;
+        item.height = height;
         changeData(dataCopy);
       }
     });
