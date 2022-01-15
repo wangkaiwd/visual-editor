@@ -46,7 +46,6 @@ export default defineComponent({
 
     function createMoveContext (): MoveContext {
       return {
-        movingBlock: undefined,
         movingIndex: -1,
         lines: { x: [], y: [] }
       };
@@ -55,6 +54,7 @@ export default defineComponent({
     const blockRefs = ref<HTMLDivElement[]>([]);
     const finalPosition = reactive<FinalPosition>({ blockY: undefined, blockX: undefined });
     const moveContext = reactive<MoveContext>(createMoveContext());
+    const moving = computed(() => moveContext.movingIndex !== -1);
     const currentMovingBlock = computed(() => {
       const { movingIndex } = moveContext;
       return blocks.value[movingIndex];
@@ -70,7 +70,6 @@ export default defineComponent({
     const { calcLines, findX, findY } = useLines(unFocusBlocks);
     const onMousedown = (e: MouseEvent, i: number, block: PlainObject) => {
       // console.log('mosuedown', e);
-      moveContext.movingBlock = block;
       moveContext.movingIndex = i;
       document.addEventListener('mousemove', onMousemove);
       document.addEventListener('mouseup', onMouseup);
@@ -111,8 +110,7 @@ export default defineComponent({
       finalPosition.blockY = blockY;
     };
     const onMousemove = (e: MouseEvent) => {
-      const { movingBlock, movingIndex, lines } = moveContext;
-      if (!movingBlock) {return;}
+      if (!moving.value) {return;}
       if (!focusBlocks.value.length) {return;}
       const moveX = e.movementX;
       const moveY = e.movementY;
@@ -133,7 +131,6 @@ export default defineComponent({
     const onMouseup = (e: MouseEvent) => {
       finalMove();
       moveContext.movingIndex = -1;
-      moveContext.movingBlock = undefined;
       moveContext.lines = { x: [], y: [] };
       guideLine.x = -1;
       guideLine.y = -1;

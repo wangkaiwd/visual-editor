@@ -11,7 +11,6 @@ export interface IY {
 }
 
 export interface MoveContext {
-  movingBlock?: PlainObject;
   movingIndex: number;
   lines: { x: IX[], y: IY [] };
 }
