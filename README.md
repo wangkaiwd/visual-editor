@@ -22,7 +22,8 @@
 ### Thinking
 
 * Should I use Vuex to implement state manage ?
-  * Yes, can use getter to generate reactive global variable
+  * global data source and can take advantages of getter to make get value easily
+  * store commands: operation maybe occur everywhere
 
 ### Article
 
@@ -34,3 +35,5 @@
 * move one block or multiple blocks
 * help lines
 * sticky to help lines(when mouseup event fired)
+  * how to sticky when mousemove
+* redo and undo

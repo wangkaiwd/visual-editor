@@ -8,7 +8,7 @@ import { DragHandler, PlainObject } from '@/utils/types';
 import { useClickOutside } from '@/hooks/clickOutside';
 import { useLines } from '@/packages/container-panel/useLines';
 import { MoveContext } from '@/packages/container-panel/types';
-import { isUndefined } from '@/utils/dataType';
+import { useCommand } from '@/packages/layout/useCommand';
 
 interface FinalPosition {
   blockY?: number;
@@ -55,6 +55,7 @@ export default defineComponent({
     const finalPosition = reactive<FinalPosition>({ blockY: undefined, blockX: undefined });
     const moveContext = reactive<MoveContext>(createMoveContext());
     const moving = computed(() => moveContext.movingIndex !== -1);
+    const { addCommand } = useCommand();
     const currentMovingBlock = computed(() => {
       const { movingIndex } = moveContext;
       return blocks.value[movingIndex];
@@ -138,12 +139,15 @@ export default defineComponent({
       finalPosition.blockX = undefined;
       document.removeEventListener('mousemove', onMousemove);
       document.removeEventListener('mouseup', onMouseup);
+      addCommand();
     };
     const renderBlocks = () => blocks.value.map((block, i) => (
       <EditorBlock
         onMousedown={(e: MouseEvent) => onMousedown(e, i, block)}
         key={block.id}
-        ref={(el: any) => {blockRefs.value[i] = el.$el as HTMLDivElement;}}
+        ref={(el: any) => {
+          if (el) {blockRefs.value[i] = el.$el as HTMLDivElement;}
+        }}
         index={i}
         block={block}
       />)

@@ -1,13 +1,15 @@
-import { defineComponent, inject } from 'vue';
+import { defineComponent, inject, onBeforeUnmount, onMounted } from 'vue';
 import ComponentsPanel from '@/packages/comonents-panel/components-panel';
 import ContainerPanel from '@/packages/container-panel/container-panel';
 import PropsPanel from '@/packages/props-panel/props-panel';
 import './index.less';
-import { ElAside, ElContainer, ElHeader } from 'element-plus';
+import { ElAside, ElButtonGroup, ElContainer, ElHeader, ElButton } from 'element-plus';
 import { RegisterParams } from '@/config/editor';
 import { AppContextKey, AppContextProps } from '@/App';
 import { deepClone } from '@/utils/helper';
 import { DragHandler } from '@/utils/types';
+import { ArrowLeftBold, ArrowRightBold, Download, Upload } from '@element-plus/icons-vue';
+import { useCommand } from '@/packages/layout/useCommand';
 
 export default defineComponent({
   name: 'Layout',
@@ -52,14 +54,31 @@ export default defineComponent({
       }
       e.preventDefault();
     };
+    const { redo, undo, onKeydown } = useCommand();
+    const buttons = [
+      { label: '撤销', icon: ArrowLeftBold, handler: undo },
+      { label: '重做', icon: ArrowRightBold, handler: redo },
+      { label: '导入', icon: Upload, handler: () => {} },
+      { label: '导出', icon: Download, handler: () => {} },
+    ];
+    onMounted(() => {
+      document.addEventListener('keydown', onKeydown);
+    });
+    onBeforeUnmount(() => {
+      document.removeEventListener('keydown', onKeydown);
+    });
     return () => (
       <ElContainer class="layout">
         <ElAside style="border:1px solid pink">
           <ComponentsPanel onDragstart={onDragstart} onDragend={onDragend}/>
         </ElAside>
         <ElContainer class="layout-editor" style="border: 1px solid pink">
-          <ElHeader style="border: 1px solid blue">
-            tool bar
+          <ElHeader class="layout-editor-header">
+            <ElButtonGroup>
+              {buttons.map(button => (
+                <ElButton type={'primary'} icon={button.icon} onClick={button.handler}>{button.label}</ElButton>
+              ))}
+            </ElButtonGroup>
           </ElHeader>
           <ElContainer class="layout-container-wrapper">
             <ContainerPanel

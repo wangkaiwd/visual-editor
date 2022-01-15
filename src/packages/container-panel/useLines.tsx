@@ -3,7 +3,7 @@ import { Ref } from '@vue/reactivity';
 import { IX, IY, MoveContext } from '@/packages/container-panel/types';
 
 export const useLines = (unFocusBlocks: Ref<PlainObject[]>) => {
-  const calcLines = (movingBlock: Required<MoveContext>['movingBlock']) => {
+  const calcLines = (movingBlock: PlainObject) => {
     const x: IX[] = [], y: IY[] = [];
     const { width: widthA, height: heightA } = movingBlock;
     unFocusBlocks.value.forEach((block) => {
